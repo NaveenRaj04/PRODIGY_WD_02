@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stopwatch</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="stopwatch">
+        <div id="display">00:00:00</div>
+        <div class="controls">
+            <button id="startStop">Start</button>
+            <button id="reset">Reset</button>
+            <button id="lap">Lap</button>
+        </div>
+        <ul id="laps"></ul>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background: linear-gradient(120deg, #f6d365, #fda085);
+    background-size: 200% 200%;
+    animation: gradientAnimation 15s ease infinite;
+    font-family: Arial, sans-serif;
+}
+
+@keyframes gradientAnimation {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+.stopwatch {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    text-align: center;
+    animation: pulseAnimation 1.5s infinite;
+}
+
+@keyframes pulseAnimation {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 4px 40px rgba(0, 0, 0, 0.2);
+    }
+}
+
+#display {
+    font-size: 48px;
+    margin-bottom: 20px;
+    color: #fff;
+    animation: textPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes textPulse {
+    0%, 100% {
+        color: #fff;
+        text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+    }
+    50% {
+        color: #e0e0e0;
+        text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+    }
+}
+
+.controls button {
+    padding: 10px 25px;
+    margin: 5px;
+    font-size: 18px;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.controls button:hover {
+    opacity: 0.9;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+}
+
+#startStop {
+    background-color: #28a745;
+    color: #fff;
+}
+
+#reset {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+#lap {
+    background-color: #ffc107;
+    color: #fff;
+}
+
+#laps {
+    list-style-type: none;
+    padding: 0;
+    margin-top: 20px;
+    color: #fff;
+}
+
+#laps li {
+    font-size: 16px;
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    margin-bottom: 5px;
+}
+let timer;
+let elapsedTime = 0;
+let running = false;
+
+const display = document.getElementById('display');
+const startStopBtn = document.getElementById('startStop');
+const resetBtn = document.getElementById('reset');
+const lapBtn = document.getElementById('lap');
+const lapsContainer = document.getElementById('laps');
+
+startStopBtn.addEventListener('click', () => {
+    if (running) {
+        clearInterval(timer);
+        startStopBtn.textContent = 'Start';
+    } else {
+        startTimer();
+        startStopBtn.textContent = 'Stop';
+    }
+    running = !running;
+});
+
+resetBtn.addEventListener('click', () => {
+    clearInterval(timer);
+    elapsedTime = 0;
+    running = false;
+    display.textContent = formatTime(elapsedTime);
+    startStopBtn.textContent = 'Start';
+    lapsContainer.innerHTML = '';
+});
+
+lapBtn.addEventListener('click', () => {
+    if (running) {
+        const lapTime = formatTime(elapsedTime);
+        const lapElement = document.createElement('li');
+        lapElement.textContent = lapTime;
+        lapsContainer.appendChild(lapElement);
+    }
+});
+
+function startTimer() {
+    const startTime = Date.now() - elapsedTime;
+    timer = setInterval(() => {
+        elapsedTime = Date.now() - startTime;
+        display.textContent = formatTime(elapsedTime);
+    }, 10);
+}
+
+function formatTime(time) {
+    const milliseconds = parseInt((time % 1000) / 10);
+    const seconds = Math.floor((time / 1000) % 60);
+    const minutes = Math.floor((time / (1000 * 60)) % 60);
+    return ${pad(minutes)}:${pad(seconds)}:${pad(milliseconds)};
+}
+
+function pad(number) {
+    return number < 10 ? '0' + number : number;
+}
